@@ -1,5 +1,13 @@
 # `booba` CHANGELOG
 
+## Unreleased
+
+### Changed
+
+- Embed the built `kamal/integration` runtime from `kamaln7/ghostty-web`,
+  combining buttonless mouse reporting, per-link hover highlighting, touch
+  activation, HiDPI glyph atlases, inverse colors, and sextant geometry.
+
 ## [0.10.7] - 2026-10-28
 
 ### Fixed

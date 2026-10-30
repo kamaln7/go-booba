@@ -132,7 +132,7 @@ tasks:
       - dist/*.js
 
   init-submodules:
-    desc: 'Initialize git submodules (third_party/ghostty-web on nm-kitty-built ships prebuilt dist/)'
+    desc: 'Initialize git submodules (third_party/ghostty-web on kamal/integration ships prebuilt dist/)'
     run: once
     cmds:
       - git submodule update --init --recursive

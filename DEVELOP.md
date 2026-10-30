@@ -31,25 +31,27 @@ installed golangci-lint binary to panic while analyzing the standard library.
 The hook also uses that toolchain's `gofmt`. Go downloads the selected toolchain
 automatically if it is not already installed.
 
-booba vendors [`ghostty-web`](https://github.com/NimbleMarkets/ghostty-web) (NimbleMarkets fork) as a git submodule at `third_party/ghostty-web`. Clone with submodules:
+booba vendors [`ghostty-web`](https://github.com/kamaln7/ghostty-web) as a git submodule at `third_party/ghostty-web`. Clone with submodules:
 
 ```sh
-git clone --recurse-submodules https://github.com/NimbleMarkets/go-booba.git
+git clone --branch kamal/integration --recurse-submodules https://github.com/kamaln7/go-booba.git
 # or after a regular clone:
 git submodule update --init --recursive
 ```
 
-The submodule is pinned to the `nm-kitty-built` branch, which ships the prebuilt `dist/` (wasm + JS + .d.ts) committed alongside the source by ghostty-web's CI. `task build` copies only the browser runtime `.js` and `.wasm` files into `serve/static/ghostty-web/`, runs the booba TypeScript embed, and produces `bin/booba` — no `bun` or `zig` toolchain needed locally. The copy script prunes obsolete chunks and non-runtime artifacts. Upstream declarations remain available through the installed npm package.
+The submodule pins a commit from `kamal/integration`, which carries prebuilt `dist/` (wasm + JS + .d.ts) alongside the source. The six feature branches remain separate for upstream review; compatibility resolutions and build artifacts live on the integration branch. `task build` copies only the browser runtime `.js` and `.wasm` files into `serve/static/ghostty-web/`, runs the booba TypeScript embed, and produces `bin/booba` — no `bun` or `zig` toolchain needed locally. The copy script prunes obsolete chunks and non-runtime artifacts. Upstream declarations remain available through the installed npm package.
 
-The embedded `serve/static/booba/*.js` and `serve/static/ghostty-web/*` files are committed so Go builds need no JS toolchain. They're refreshed by bumping the `third_party/ghostty-web` submodule pointer to a new `nm-kitty-built` tip and re-running `task build-serve-assets` locally before committing.
+The embedded `serve/static/booba/*.js` and `serve/static/ghostty-web/*` files are committed so Go builds need no JS toolchain. They're refreshed by bumping the `third_party/ghostty-web` submodule pointer to a built `kamal/integration` commit and re-running `task build-serve-assets` locally before committing.
+
+To produce a new snapshot, build `kamal/integration` in the Ghostty checkout with `nix develop -c bun run build`, then commit `dist/` and `ghostty-vt.wasm` on that branch. Update Booba only after those artifacts are committed; its submodule gitlink pins the exact source-and-artifact commit.
 
 The `serve/static` package (`serve/static/embed.go`) `go:embed`s these same files, so both the `serve` package and the `booba-assets` scaffolding tool ship them inside their binaries. Explicit `*.js` and `*.wasm` patterns include underscore-prefixed Vite chunks while excluding CJS bundles, declarations, and maps left over from older builds. The embed build emits JavaScript only; `npm run build` still emits declarations and source maps into `dist/` for npm consumers.
 
 ### Updating ghostty-web
 
 ```sh
-git -C third_party/ghostty-web fetch origin nm-kitty-built
-git -C third_party/ghostty-web checkout --detach origin/nm-kitty-built
+git -C third_party/ghostty-web fetch origin kamal/integration
+git -C third_party/ghostty-web checkout --detach origin/kamal/integration
 npm install --package-lock-only --ignore-scripts
 task build-serve-assets
 task build-npm
